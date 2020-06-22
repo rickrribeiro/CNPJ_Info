@@ -13,14 +13,15 @@ async function asyncForEach(array, callback) {
 router.get('/list', async(req, res) => {
    try{
        console.log("chegou na list")
-       var List = await Sheets.getCNPJ()
+       var List = await Sheets.getCNPJNaoValidado()
        var i =0;
   
     console.log("antes de iterar")
     for (var i = 0; i < List.length; i++) {
-        console.log("Lista[i]: "+List[i])
+        console.log("Lista[i]: "+ List[i])
         var lis = await receitaAPI.getInfo(List[i]);
         console.log("iterou"+i)
+        console.log(List[i]+" resultado: "+lis.error)
         await Sheets.Solicitar(lis,List[i])
     }
     
@@ -35,6 +36,17 @@ router.get('/list', async(req, res) => {
    }catch(err){
        res.send("err2: "+ err)
    }
+});
+
+router.get('/teste', async(req, res) => {
+  try{
+      console.log("chegou no test")
+      var List = await Sheets.getCNPJNaoValidado()
+   res.send(List)
+ 
+  }catch(err){
+      res.send("err2: "+ err)
+  }
 });
 
 // fill
