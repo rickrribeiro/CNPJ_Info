@@ -2,12 +2,14 @@ const GoogleSpreadsheet = require('google-spreadsheet')
 const { promisify } = require('util')
 var cnpjList = []
 const creds = require('./spreadsheet_secret.json');
-const spreadsheetCNPJ_secret = `1W_Ov1MvNeR5Qp67fEkqXSpBA6iQNf6RUdz_zK4YB6EY`
+const spreadsheetCNPJ_secret = `1jQ0j5xSLF09OhItQpHGAg5DKkuNYQ3fz2dR3A36_fzw`
 
 async function getCNPJ() {
   cnpjList = []
   console.log("bj")
+  try{
 
+  
 
   const docCNPJ = new GoogleSpreadsheet(spreadsheetCNPJ_secret)
   
@@ -34,6 +36,9 @@ async function getCNPJ() {
     }   
    
   });
+}catch(err){
+  console.log("geteer: "+err)
+}
   console.log(cnpjList.length)
   return cnpjList
 } 
@@ -42,7 +47,9 @@ async function getCNPJ() {
 async function getCNPJNaoValidado() {
   cnpjList = []
   console.log("bjnaovalidado")
+  try{
 
+ 
 
   const docCNPJ = new GoogleSpreadsheet(spreadsheetCNPJ_secret)
   
@@ -55,17 +62,20 @@ async function getCNPJNaoValidado() {
     const info = await promisify(docCNPJ.getInfo)()
   
   console.log("aqqqqqqqqnaovalidado")
+  //console.log(info)
   const sheet = info.worksheets[0]
   const rows = await promisify(sheet.getRows)({
     offset: 0,
     limit: 9999
   })
-  
+  console.log(rows)
   try{
     rows.forEach(element => {
-       
-       if(element.cnpj.length>0 && element.statuscnpj.length==0){
-         cnpjList.push(element.cnpj)
+       console.log(element.cnpj+" "+element.statuscnpj)
+       if( element.cnpj.length>0 && element.statuscnpj.length==0){
+    //    console.log("2")
+       // console.log(element.cnpj)
+        cnpjList.push(element.cnpj)
        }   
       
      });
@@ -74,7 +84,9 @@ async function getCNPJNaoValidado() {
     console.log(err)
     
   }
-  
+}catch(err){
+  console.log("errn: "+err)
+}
   console.log(cnpjList.length)
   return cnpjList
 } 
@@ -94,7 +106,7 @@ async function Solicitar(solicitacao,cnpj){
     //orderby: 'col2'
   })
   console.log("vai começar o for")
-  for(var i=0; i<30;i++){
+  for(var i=0; i<rows.length;i++){
     
     
     
@@ -105,13 +117,17 @@ async function Solicitar(solicitacao,cnpj){
     }
     rows[i].cnpj = rows[i].cnpj.normalize('NFD').replace(/([\u0300-\u036f]|[^0-9a-zA-Z])/g, '')
     console.log("cnpj "+ rows[i].cnpj)
+    console.log("VAI COMEÇAR A BOTAR OS DADOS")
      if(rows[i] && rows[i].cnpj == cnpj){
       console.log("entrou2: "+ JSON.stringify(solicitacao))
       try{
         if(solicitacao.error==undefined){
           rows[i].statuscnpj="Validado"
         }else{
-          rows[i].statuscnpj="Nao encontrado"
+          if(solicitacao.error!=429){
+            rows[i].statuscnpj="Nao encontrado"
+          }
+          
         }
       rows[i].nome = solicitacao.name; 
       rows[i].email = solicitacao.email
@@ -143,6 +159,7 @@ async function Solicitar(solicitacao,cnpj){
       }catch(err){
         console.log("err3: "+err)
       }
+      console.log("ACABOU DE BOTAR OS DADOS")
       try{
         console.log("insert1: "+ rows[i].nome)
         await rows[i].save();
