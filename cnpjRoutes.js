@@ -12,23 +12,23 @@ async function asyncForEach(array, callback) {
 
 router.get('/list', async(req, res) => {
    try{
-       console.log("chegou na list")
+     console.log("Iniciando")
        var List = await Sheets.getCNPJNaoValidado()
        var i =0;
   
-    console.log("antes de iterar")
+   // console.log("antes de iterar")
     for (var i = 0; i < List.length; i++) {
-        console.log("Lista[i]: "+ List[i])
+       // console.log("Lista[i]: "+ List[i])
         var lis = await receitaAPI.getInfo(List[i]);
-        console.log("iterou"+i)
-        console.log(List[i]+" resultado: "+lis.error)
+     //   console.log("iterou"+i)
+       // console.log(List[i]+" resultado: "+lis.error)
         await Sheets.Solicitar(lis,List[i])
     }
     
     //95015335d9ad6ee58eb01a5781520ae99270de1ddef83686798956d43bdc2607
 
-
-    res.send("cabo")
+    console.log("Finalizado!")
+    res.send("Finalizado")
     
   
     //res.send(lis.nome)

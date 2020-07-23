@@ -2,11 +2,12 @@ const GoogleSpreadsheet = require('google-spreadsheet')
 const { promisify } = require('util')
 var cnpjList = []
 const creds = require('./spreadsheet_secret.json');
-const spreadsheetCNPJ_secret = `1jQ0j5xSLF09OhItQpHGAg5DKkuNYQ3fz2dR3A36_fzw`
+const secrets = require('./secrets.json')
+const spreadsheetCNPJ_secret = secrets.spreadsheet
 
 async function getCNPJ() {
   cnpjList = []
-  console.log("bj")
+ // console.log("bj")
   try{
 
   
@@ -14,14 +15,14 @@ async function getCNPJ() {
   const docCNPJ = new GoogleSpreadsheet(spreadsheetCNPJ_secret)
   
   
-  console.log("bj")
+ // console.log("bj")
   await promisify(docCNPJ.useServiceAccountAuth)(creds)
-  console.log("bj")
+ // console.log("bj")
   
 
     const info = await promisify(docCNPJ.getInfo)()
   
-  console.log("aqqqqqqqq")
+ // console.log("aqqqqqqqq")
   const sheet = info.worksheets[0]
   const rows = await promisify(sheet.getRows)({
     offset: 0,
@@ -39,14 +40,14 @@ async function getCNPJ() {
 }catch(err){
   console.log("geteer: "+err)
 }
-  console.log(cnpjList.length)
+  console.log("Quantidade CNPJ:" + cnpjList.length)
   return cnpjList
 } 
 
 
 async function getCNPJNaoValidado() {
   cnpjList = []
-  console.log("bjnaovalidado")
+  //console.log("bjnaovalidado")
   try{
 
  
@@ -54,24 +55,24 @@ async function getCNPJNaoValidado() {
   const docCNPJ = new GoogleSpreadsheet(spreadsheetCNPJ_secret)
   
   
-  console.log("bjnaovalidado")
+ // console.log("bjnaovalidado")
   await promisify(docCNPJ.useServiceAccountAuth)(creds)
-  console.log("bjnaovalidado")
+ // console.log("bjnaovalidado")
   
 
     const info = await promisify(docCNPJ.getInfo)()
   
-  console.log("aqqqqqqqqnaovalidado")
+  //console.log("aqqqqqqqqnaovalidado")
   //console.log(info)
   const sheet = info.worksheets[0]
   const rows = await promisify(sheet.getRows)({
     offset: 0,
     limit: 9999
   })
-  console.log(rows)
+  //console.log(rows)
   try{
     rows.forEach(element => {
-       console.log(element.cnpj+" "+element.statuscnpj)
+       //console.log(element.cnpj+" "+element.statuscnpj)
        if( element.cnpj.length>0 && element.statuscnpj.length==0){
     //    console.log("2")
        // console.log(element.cnpj)
@@ -94,7 +95,7 @@ async function getCNPJNaoValidado() {
 
 
 async function Solicitar(solicitacao,cnpj){
-  
+  console.log("Inserindo cnpj: "+ cnpj)
   const docCNPJ = new GoogleSpreadsheet(spreadsheetCNPJ_secret)
   await promisify(docCNPJ.useServiceAccountAuth)(creds)
   const info = await promisify(docCNPJ.getInfo)()
@@ -105,7 +106,7 @@ async function Solicitar(solicitacao,cnpj){
     limit: 9999
     //orderby: 'col2'
   })
-  console.log("vai começar o for")
+  //console.log("vai começar o for")
   for(var i=0; i<rows.length;i++){
     
     
@@ -116,10 +117,10 @@ async function Solicitar(solicitacao,cnpj){
       break;
     }
     rows[i].cnpj = rows[i].cnpj.normalize('NFD').replace(/([\u0300-\u036f]|[^0-9a-zA-Z])/g, '')
-    console.log("cnpj "+ rows[i].cnpj)
-    console.log("VAI COMEÇAR A BOTAR OS DADOS")
+  //  console.log("cnpj "+ rows[i].cnpj)
+ //   console.log("VAI COMEÇAR A BOTAR OS DADOS")
      if(rows[i] && rows[i].cnpj == cnpj){
-      console.log("entrou2: "+ JSON.stringify(solicitacao))
+    //  console.log("entrou2: "+ JSON.stringify(solicitacao))
       try{
         if(solicitacao.error==undefined){
           rows[i].statuscnpj="Validado"
@@ -159,11 +160,11 @@ async function Solicitar(solicitacao,cnpj){
       }catch(err){
         console.log("err3: "+err)
       }
-      console.log("ACABOU DE BOTAR OS DADOS")
+  //    console.log("ACABOU DE BOTAR OS DADOS")
       try{
-        console.log("insert1: "+ rows[i].nome)
+    //    console.log("insert1: "+ rows[i].nome)
         await rows[i].save();
-        console.log("insert2: "+ solicitacao.name)
+     //   console.log("insert2: "+ solicitacao.name)
       }catch(err){
         console.log("err insert: "+err)
       }
